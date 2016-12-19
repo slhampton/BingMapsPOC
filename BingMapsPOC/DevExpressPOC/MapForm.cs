@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
-using DevExpress.XtraMap;
 
-namespace BingMapsPOC
+namespace DevExpressPOC
 {
     public partial class MapForm : Form
     {
@@ -26,7 +24,7 @@ namespace BingMapsPOC
 
         VectorItemsLayer VectorLayer { get { return (VectorItemsLayer)mapControl1.Layers[1]; } }
 
-        public MapForm()
+public MapForm()
         {
             InitializeComponent();
 

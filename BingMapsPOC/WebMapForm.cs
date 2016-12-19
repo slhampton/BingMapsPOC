@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using CefSharp;
+using CefSharp.WinForms;
 using DevExpress.XtraMap;
 
 namespace BingMapsPOC
 {
-    public partial class MapForm : Form
+    public partial class WebMapForm : Form
     {
+        public ChromiumWebBrowser browser;
+
         private readonly List<Bookmark> bookmarks = new List<Bookmark>
         {
             new Bookmark
@@ -23,17 +27,16 @@ namespace BingMapsPOC
                 ZoomLevel = 6
             }
         };
+        
 
-        VectorItemsLayer VectorLayer { get { return (VectorItemsLayer)mapControl1.Layers[1]; } }
-
-        public MapForm()
+        public WebMapForm()
         {
             InitializeComponent();
 
-            var itemStorage = new MapItemStorage();
-            itemStorage.Items.Add(new MapPushpin { Location = new GeoPoint(51.507222, -0.1275), Text = "1" });
-
-            VectorLayer.Data = itemStorage;
+            Cef.Initialize(new CefSettings());
+            browser = new ChromiumWebBrowser("https://www.bing.com/maps/");
+            this.Controls.Add(browser);
+            browser.Dock = DockStyle.Fill;
 
             var bookmarkButtonList = new List<Button>();
 
@@ -46,9 +49,6 @@ namespace BingMapsPOC
             }
 
             flowLayoutPanel1.Controls.AddRange(bookmarkButtonList.ToArray());
-
-            // Set different default CenterPoint depending on current region 
-            mapControl1.CenterPoint = new GeoPoint(53, -5);
         }
 
 
@@ -70,16 +70,16 @@ namespace BingMapsPOC
         {
             var bookmark = bookmarks.FirstOrDefault(x => x.Id == id);
 
-            bookmark.ZoomLevel = mapControl1.ZoomLevel;
-            bookmark.Coordinates = mapControl1.CenterPoint as GeoPoint;
+            //bookmark.ZoomLevel = mapControl1.ZoomLevel;
+            //bookmark.Coordinates = mapControl1.CenterPoint as GeoPoint;
         }
 
         private void GoToBookmark(string id)
         {
             var bookmark = bookmarks.FirstOrDefault(x => x.Id == id);
 
-            mapControl1.CenterPoint = bookmark.Coordinates;
-            mapControl1.ZoomLevel = bookmark.ZoomLevel;
+            //mapControl1.CenterPoint = bookmark.Coordinates;
+            //mapControl1.ZoomLevel = bookmark.ZoomLevel;
         }
     }
 }

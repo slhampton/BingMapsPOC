@@ -1,11 +1,9 @@
-﻿using DevExpress.XtraMap;
-
-namespace BingMapsPOC
+﻿namespace DevExpressPOC
 {
     public class Bookmark
     {
         public string Id { get; set; }
-        public GeoPoint Coordinates { get; set; }
+        public Location Coordinates { get; set; }
         public double ZoomLevel { get; set; }
     }
 }

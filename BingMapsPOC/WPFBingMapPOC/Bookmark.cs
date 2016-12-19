@@ -1,11 +1,11 @@
-﻿using DevExpress.XtraMap;
+﻿using Microsoft.Maps.MapControl.WPF;
 
-namespace BingMapsPOC
+namespace WPFBingMapPOC
 {
     public class Bookmark
     {
         public string Id { get; set; }
-        public GeoPoint Coordinates { get; set; }
+        public Location Coordinates { get; set; }
         public double ZoomLevel { get; set; }
     }
 }
