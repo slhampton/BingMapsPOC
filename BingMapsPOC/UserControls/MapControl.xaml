@@ -14,8 +14,7 @@
                Grid.Row="0" 
                Grid.RowSpan="2" 
                CredentialsProvider="AsJ2NC7HdNc4k8T03GPuBT5IwzYUJATkSTWfaog7uEJ0lsx_XLS3st1ZStjitTm2"
-               MouseDoubleClick="MapWithPushpins_MouseDoubleClick"
-               MouseRightButtonDown="MapWithPushpins_MouseRightButtonDown" />
+               MouseDoubleClick="MapWithPushpins_MouseDoubleClick" />
         <StackPanel Orientation="Horizontal" Opacity="0.7" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center">
             <Button x:Name="btn1" Click="ChangeMapView_Click" Tag="39.3683,-95.2734,0.0000 4.0000"
                      Margin="5">

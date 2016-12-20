@@ -69,30 +69,38 @@ namespace UserControls
             e.Handled = true;
 
             //Get the mouse click coordinates
-            Point mousePosition = e.GetPosition(this);
-            //Convert the mouse coordinates to a locatoin on the map
-            Location pinLocation = this.Map.ViewportPointToLocation(mousePosition);
+            var point = e.GetPosition(this);
+            //Convert the mouse coordinates to a location on the map
+            var location = this.Map.ViewportPointToLocation(point);
 
-            // The pushpin to add to the map.
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                DrawCar(location);
+            }
+            else
+            {
+                DrawPin(location);
+            }
+        }
+
+        private void DrawPin(Location location)
+        {
+// The pushpin to add to the map.
             Pushpin pin = new Pushpin
             {
-                Location = pinLocation
+                Location = location
             };
 
             // Adds the pushpin to the map.
             this.Map.Children.Add(pin);
         }
 
-        private void MapWithPushpins_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private void DrawCar(Location location)
         {
-            Location location;
-            var point = e.GetPosition(this);
-            this.Map.TryViewportPointToLocation(point, out location);
-
-            var radius = 12.0;
+            var radius = 20.0;
             var finalImage = new Image();
-            finalImage.Width = 40;
-            finalImage.Height = 40;
+            finalImage.Width = radius*2;
+            finalImage.Height = radius*2;
             var logo = new BitmapImage();
             logo.BeginInit();
             logo.UriSource = new Uri("car.png", UriKind.Relative);
@@ -100,8 +108,9 @@ namespace UserControls
             finalImage.Source = logo;
 
             var tt = new ToolTip();
-            tt.Content = "Location = " + location;
+            tt.Content = "CaseNo = 12345";
             finalImage.ToolTip = tt;
+
             var p0 = this.Map.LocationToViewportPoint(location);
             var p1 = new Point(p0.X - radius, p0.Y - radius);
             var loc = this.Map.ViewportPointToLocation(p1);
