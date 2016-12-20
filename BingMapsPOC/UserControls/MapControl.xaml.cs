@@ -116,5 +116,15 @@ namespace UserControls
             MapLayer.SetPosition(finalImage, loc);
             this.Map.Children.Add(finalImage);
         }
+
+        private async void PlanRoute_Click(object sender, RoutedEventArgs e)
+        {
+            var route = await BingMapsService.PlanRoute(new Location(51.103, 0.660), new Location(51.123, 0.772));
+
+            var routeCentre = new LocationRect(route.Locations[0], route.Locations[route.Locations.Count - 1]);
+            this.Map.SetView(routeCentre);
+
+            this.Map.Children.Add(route);
+        }
     }
 }
