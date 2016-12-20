@@ -19,16 +19,18 @@ namespace UserControls
     public partial class MapControl : UserControl
     {
         readonly LocationConverter locationConverter = new LocationConverter();
+        private Location endLocation;
+        private Location startLocation;
 
         public MapControl()
         {
             InitializeComponent();
-            
+
             this.Map.Center = new Location(53, -5);
             this.Map.ZoomLevel = 7;
-            
+
         }
-        
+
         private void ChangeMapView_Click(object sender, RoutedEventArgs e)
         {
             // Parse the information of the button's Tag property
@@ -40,11 +42,11 @@ namespace UserControls
             {
                 center = this.Map.Center;
                 zoom = this.Map.ZoomLevel;
-                ((Button) sender).Tag = $"{center.Latitude},{center.Longitude},{center.Altitude} {zoom}";
+                ((Button)sender).Tag = $"{center.Latitude},{center.Longitude},{center.Altitude} {zoom}";
             }
             else
             {
-                center = (Location) locationConverter.ConvertFrom(tagInfo[0]);
+                center = (Location)locationConverter.ConvertFrom(tagInfo[0]);
                 zoom = System.Convert.ToDouble(tagInfo[1]);
 
                 // Set the map view
@@ -96,18 +98,19 @@ namespace UserControls
 
         private void DrawCar(Location location)
         {
-            var radius = 20.0;
-            var finalImage = new Image();
-            finalImage.Width = radius*2;
-            finalImage.Height = radius*2;
+            const double radius = 20.0;
+            var finalImage = new Image
+            {
+                Width = radius * 2,
+                Height = radius * 2
+            };
             var logo = new BitmapImage();
             logo.BeginInit();
             logo.UriSource = new Uri("SUV-48.png", UriKind.Relative);
             logo.EndInit();
             finalImage.Source = logo;
 
-            var tt = new ToolTip();
-            tt.Content = "CaseNo = 12345";
+            var tt = new ToolTip { Content = "CaseNo = 12345" };
             finalImage.ToolTip = tt;
 
             var p0 = this.Map.LocationToViewportPoint(location);
@@ -119,12 +122,42 @@ namespace UserControls
 
         private async void PlanRoute_Click(object sender, RoutedEventArgs e)
         {
-            var route = await BingMapsService.PlanRoute(new Location(51.103, 0.660), new Location(51.123, 0.772));
+            var start = this.startLocation;
+            var end = this.endLocation;
+
+            this.DrawPin(start);
+            this.DrawPin(end);
+
+            var route = await BingMapsService.PlanRoute(start, end);
 
             var routeCentre = new LocationRect(route.Locations[0], route.Locations[route.Locations.Count - 1]);
-            this.Map.SetView(routeCentre);
 
             this.Map.Children.Add(route);
+            this.Map.SetView(routeCentre);
+        }
+
+        private void AddStartPoint(object sender, RoutedEventArgs e)
+        {
+            // Get the mouse click coordinates
+            var point = Mouse.GetPosition(this);
+
+            this.startLocation = this.Map.ViewportPointToLocation(point);
+
+            this.DrawPin(startLocation);
+
+            ((MenuItem) sender).IsEnabled = false;
+        }
+
+        private void AddEndPoint(object sender, RoutedEventArgs e)
+        {
+            // Get the mouse click coordinates
+            var point = Mouse.GetPosition(this);
+
+            this.endLocation = this.Map.ViewportPointToLocation(point);
+
+            this.DrawPin(endLocation);
+            
+            ((MenuItem)sender).IsEnabled = false;
         }
     }
 }

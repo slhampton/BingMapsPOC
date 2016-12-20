@@ -5,6 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:m="clr-namespace:Microsoft.Maps.MapControl.WPF;assembly=Microsoft.Maps.MapControl.WPF">
     <Grid>
+        <Grid.ContextMenu>
+            <ContextMenu>
+                <MenuItem Uid="miStart" Click="AddStartPoint" Header="Add as start point"></MenuItem>
+                <MenuItem Uid="miEnd" Click="AddEndPoint" Header="Add as end point"></MenuItem>
+            </ContextMenu>
+        </Grid.ContextMenu>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="40" />
