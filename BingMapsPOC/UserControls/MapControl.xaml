@@ -35,6 +35,9 @@
             <Button x:Name="btnZoomOut" Click="ZoomOut_Click" Margin="5" Height="20">
                 <TextBlock>-</TextBlock>
             </Button>
+            <Button x:Name="btnPlanRoute" Click="PlanRoute_Click" Margin="5">
+                <TextBlock>Plan Route</TextBlock>
+            </Button>
         </StackPanel>
     </Grid>
 </UserControl>
