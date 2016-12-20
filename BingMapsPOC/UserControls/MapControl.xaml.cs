@@ -1,7 +1,9 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Microsoft.Maps.MapControl.WPF;
 using Microsoft.Maps.MapControl.WPF.Design;
@@ -87,21 +89,24 @@ namespace UserControls
             var point = e.GetPosition(this);
             this.Map.TryViewportPointToLocation(point, out location);
 
-            Ellipse dot = new Ellipse();
-            SolidColorBrush blueBrush = new SolidColorBrush();
-            blueBrush.Color = Colors.Blue;
-            dot.Fill = blueBrush;
-            double radius = 12.0;
-            dot.Width = radius * 2;
-            dot.Height = radius * 2;
-            ToolTip tt = new ToolTip();
+            var radius = 12.0;
+            var finalImage = new Image();
+            finalImage.Width = 40;
+            finalImage.Height = 40;
+            var logo = new BitmapImage();
+            logo.BeginInit();
+            logo.UriSource = new Uri("car.png", UriKind.Relative);
+            logo.EndInit();
+            finalImage.Source = logo;
+
+            var tt = new ToolTip();
             tt.Content = "Location = " + location;
-            dot.ToolTip = tt;
-            Point p0 = this.Map.LocationToViewportPoint(location);
-            Point p1 = new Point(p0.X - radius, p0.Y - radius);
-            Location loc = this.Map.ViewportPointToLocation(p1);
-            MapLayer.SetPosition(dot, loc);
-            this.Map.Children.Add(dot);
+            finalImage.ToolTip = tt;
+            var p0 = this.Map.LocationToViewportPoint(location);
+            var p1 = new Point(p0.X - radius, p0.Y - radius);
+            var loc = this.Map.ViewportPointToLocation(p1);
+            MapLayer.SetPosition(finalImage, loc);
+            this.Map.Children.Add(finalImage);
         }
     }
 }
