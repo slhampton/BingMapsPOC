@@ -86,11 +86,10 @@ namespace UserControls
         private void DrawPin(Location location)
         {
 // The pushpin to add to the map.
-            Pushpin pin = new Pushpin
+            var pin = new Pushpin()
             {
                 Location = location
             };
-
             // Adds the pushpin to the map.
             this.Map.Children.Add(pin);
         }
@@ -103,7 +102,7 @@ namespace UserControls
             finalImage.Height = radius*2;
             var logo = new BitmapImage();
             logo.BeginInit();
-            logo.UriSource = new Uri("car.png", UriKind.Relative);
+            logo.UriSource = new Uri("SUV-48.png", UriKind.Relative);
             logo.EndInit();
             finalImage.Source = logo;
 
