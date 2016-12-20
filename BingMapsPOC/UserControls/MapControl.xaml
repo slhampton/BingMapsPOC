@@ -9,7 +9,13 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="40" />
         </Grid.RowDefinitions>
-        <m:Map Name="Map" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" CredentialsProvider="AsJ2NC7HdNc4k8T03GPuBT5IwzYUJATkSTWfaog7uEJ0lsx_XLS3st1ZStjitTm2"/>
+        <m:Map Name="Map" 
+               Grid.Column="0" 
+               Grid.Row="0" 
+               Grid.RowSpan="2" 
+               CredentialsProvider="AsJ2NC7HdNc4k8T03GPuBT5IwzYUJATkSTWfaog7uEJ0lsx_XLS3st1ZStjitTm2"
+               MouseDoubleClick="MapWithPushpins_MouseDoubleClick"
+               MouseRightButtonDown="MapWithPushpins_MouseRightButtonDown" />
         <StackPanel Orientation="Horizontal" Opacity="0.7" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center">
             <Button x:Name="btn1" Click="ChangeMapView_Click" Tag="39.3683,-95.2734,0.0000 4.0000"
                      Margin="5">
@@ -23,6 +29,12 @@
             </Button>
             <Button x:Name="btn4" Click="ChangeMapView_Click" Tag="49.2765,-123.1030,0.0000 14.0000" Margin="5">
                 <TextBlock>4</TextBlock>
+            </Button>
+            <Button x:Name="btnZoomIn" Click="ZoomIn_Click" Margin="5" Height="20">
+                <TextBlock>+</TextBlock>
+            </Button>
+            <Button x:Name="btnZoomOut" Click="ZoomOut_Click" Margin="5" Height="20">
+                <TextBlock>-</TextBlock>
             </Button>
         </StackPanel>
     </Grid>
