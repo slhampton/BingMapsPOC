@@ -14,6 +14,7 @@
                     <MenuItem Name="Plan" Click="PlanRoute_Click" Header="Plan Route"></MenuItem>
                     <MenuItem Name="Clear" Click="ClearRoute_Click" Header="Clear Route"></MenuItem>
                 </MenuItem>
+                <MenuItem Name="Draw" Click="DrawArea_Click" Header="Draw Area"></MenuItem>
             </ContextMenu>
         </Grid.ContextMenu>
         <Grid.RowDefinitions>
@@ -26,7 +27,8 @@
                Grid.Row="0" 
                Grid.RowSpan="2" 
                CredentialsProvider="AsJ2NC7HdNc4k8T03GPuBT5IwzYUJATkSTWfaog7uEJ0lsx_XLS3st1ZStjitTm2"
-               MouseDoubleClick="MapWithPushpins_MouseDoubleClick" />
+               MouseDoubleClick="MapWithPushpins_MouseDoubleClick" 
+               MouseLeftButtonUp="mouseLeftButtonUp" />
         <StackPanel Orientation="Horizontal" Opacity="0.7" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center">
             <Button x:Name="btn1" Click="ChangeMapView_Click" Tag="39.3683,-95.2734,0.0000 4.0000"
                      Margin="5">

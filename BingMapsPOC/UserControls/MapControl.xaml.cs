@@ -22,19 +22,25 @@ namespace UserControls
         private Location endLocation;
         private Location startLocation;
         private readonly MapLayer baseLayer;
+        private readonly MapLayer drawLayer;
         private readonly MapLayer routeLayer;
         private Point pointClicked;
         private readonly List<Location> stopLocations = new List<Location>();
         private List<MapLayer> InitialLayers = new List<MapLayer>();
         private Random random = new Random();
+        private bool isDrawing = false;
+        private Location center;
+        private MapPolygon currentShape;
 
         public MapControl()
         {
             InitializeComponent();
 
+            this.drawLayer = new MapLayer {Tag = "draw"};
             this.baseLayer = new MapLayer { Tag = "base" };
             this.routeLayer = new MapLayer { Tag = "route" };
             this.Map.Children.Add(this.baseLayer);
+            this.Map.Children.Add(this.drawLayer);
             this.Map.Children.Add(this.routeLayer);
 
             this.AddLayers();
@@ -284,6 +290,29 @@ namespace UserControls
             this.pointClicked = e.GetPosition(this);
         }
 
+        private void mouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (isDrawing)
+            {
+                isDrawing = false;
+
+                //Remove map events
+                this.Map.MouseLeftButtonDown -= MouseTouchStartHandler;
+                this.Map.MouseMove -= MouseTouchMoveHandler;
+                this.Map.MouseLeftButtonUp -= MouseTouchEndHandler;
+                this.Map.ViewChangeOnFrame -= ViewChangeOnFrame;
+
+                this.ZoomToSelection(this.currentShape);
+            }
+        }
+
+        private void ZoomToSelection(MapPolygon rectangle)
+        {
+            var routeCentre = new LocationRect(currentShape.Locations);
+            this.Map.SetView(routeCentre);
+            this.drawLayer.Children.Clear();
+        }
+
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             var layer = ((CheckBox)sender).Tag.ToString();
@@ -294,6 +323,85 @@ namespace UserControls
         {
             var layer = ((CheckBox)sender).Tag.ToString();
             ShowLayer(layer);
+        }
+
+        private void DrawArea_Click(object sender, RoutedEventArgs e)
+        {
+            //Capture the current center of the map. We will use this to lock the map view.
+            center = this.Map.Center;
+
+            this.Map.MouseLeftButtonDown += MouseTouchStartHandler;
+            this.Map.MouseMove += MouseTouchMoveHandler;
+            this.Map.MouseLeftButtonUp += MouseTouchEndHandler;
+            this.Map.ViewChangeOnFrame += ViewChangeOnFrame;
+        }
+
+        private void MouseTouchStartHandler(object sender, MouseButtonEventArgs e)
+        {
+            var startLoc = GetMouseTouchLocation(e);
+
+            this.drawLayer.Children.Clear();
+
+            if (startLoc != null)
+            {
+                //Create a polygon that has four corners, all of which are the starting location.
+                currentShape = new MapPolygon()
+                {
+                    Locations = new LocationCollection()
+                    {
+                        startLoc,
+                        startLoc,
+                        startLoc,
+                        startLoc
+                    },
+                    Fill = new SolidColorBrush(Colors.Transparent),
+                    Stroke = new SolidColorBrush(Colors.Red),
+                    StrokeThickness = 2
+                };
+
+                this.drawLayer.Children.Add(currentShape);
+
+                isDrawing = true;
+            }
+        }
+
+        private void MouseTouchMoveHandler(object sender, MouseEventArgs e)
+        {
+            if (isDrawing)
+            {
+                var currentLoc = GetMouseTouchLocation(e);
+                if (currentLoc != null)
+                {
+                    var firstLoc = currentShape.Locations[0];
+
+                    //Update locations 1 - 3 of polygon so as to create a rectangle.
+                    currentShape.Locations[1] = new Location(firstLoc.Latitude, currentLoc.Longitude);
+                    currentShape.Locations[2] = currentLoc;
+                    currentShape.Locations[3] = new Location(currentLoc.Latitude, firstLoc.Longitude);
+                }
+            }
+        }
+
+        private void MouseTouchEndHandler(object sender, MouseButtonEventArgs e)
+        {
+            //Update drawing flag so that polygon isn't updated when mouse is moved.
+            isDrawing = false;
+        }
+
+        private void ViewChangeOnFrame(object sender, MapEventArgs e)
+        {
+            //If drawing keep reseting the center to the original center value when we entered drawing mode. 
+            //This will disable panning of the map when we click and drag. 
+            this.Map.Center = center;
+        }
+
+        private Location GetMouseTouchLocation(MouseEventArgs e)
+        {
+            Location loc = null;
+
+            this.Map.TryViewportPointToLocation(e.GetPosition(this.Map), out loc);
+
+            return loc;
         }
     }
 }
