@@ -7,6 +7,10 @@
     <Grid MouseRightButtonDown="mouseRightButtonDown">
         <Grid.ContextMenu>
             <ContextMenu>
+                <MenuItem Header="Zoom">
+                    <MenuItem Name="ZoomIn" Click="ZoomIn_Click" Header="Zoom In"></MenuItem>
+                    <MenuItem Name="ZoomOut" Click="ZoomOut_Click" Header="Zoom Out"></MenuItem>
+                </MenuItem>
                 <MenuItem Header="Route">
                     <MenuItem Name="Start" Click="AddStartPoint" Header="Add as start point"></MenuItem>
                     <MenuItem Name="End" Click="AddEndPoint" Header="Add as end point"></MenuItem>

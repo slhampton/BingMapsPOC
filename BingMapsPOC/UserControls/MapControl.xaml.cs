@@ -124,11 +124,19 @@ namespace UserControls
 
         private void ZoomIn_Click(object sender, RoutedEventArgs e)
         {
+            if (!(sender is Button))
+            {
+                this.Map.Center = this.Map.ViewportPointToLocation(this.pointClicked);
+            }
             this.Map.ZoomLevel++;
         }
 
         private void ZoomOut_Click(object sender, RoutedEventArgs e)
         {
+            if (!(sender is Button))
+            {
+                this.Map.Center = this.Map.ViewportPointToLocation(this.pointClicked);
+            }
             this.Map.ZoomLevel--;
         }
 
@@ -137,11 +145,8 @@ namespace UserControls
             // Disables the default mouse double-click action.
             e.Handled = true;
 
-            // Get the mouse click coordinates
-            var point = e.GetPosition(this);
-
             // Convert the mouse coordinates to a location on the map
-            var location = this.Map.ViewportPointToLocation(point);
+            var location = this.Map.ViewportPointToLocation(e.GetPosition(this));
 
             if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
@@ -292,18 +297,20 @@ namespace UserControls
 
         private void mouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (isDrawing)
+            if (!isDrawing)
             {
-                isDrawing = false;
-
-                //Remove map events
-                this.Map.MouseLeftButtonDown -= MouseTouchStartHandler;
-                this.Map.MouseMove -= MouseTouchMoveHandler;
-                this.Map.MouseLeftButtonUp -= MouseTouchEndHandler;
-                this.Map.ViewChangeOnFrame -= ViewChangeOnFrame;
-
-                this.ZoomToSelection(this.currentShape);
+                return;
             }
+
+            isDrawing = false;
+
+            //Remove map events
+            this.Map.MouseLeftButtonDown -= MouseTouchStartHandler;
+            this.Map.MouseMove -= MouseTouchMoveHandler;
+            this.Map.MouseLeftButtonUp -= MouseTouchEndHandler;
+            this.Map.ViewChangeOnFrame -= ViewChangeOnFrame;
+
+            this.ZoomToSelection(this.currentShape);
         }
 
         private void ZoomToSelection(MapPolygon rectangle)
