@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -21,10 +23,15 @@ namespace UserControls
         readonly LocationConverter locationConverter = new LocationConverter();
         private Location endLocation;
         private Location startLocation;
+        private readonly MapLayer routeLayer;
+        private Point pointClicked;
 
         public MapControl()
         {
             InitializeComponent();
+
+            this.routeLayer = new MapLayer() { Tag = "route" };
+            this.Map.Children.Add(this.routeLayer);
 
             this.Map.Center = new Location(53, -5);
             this.Map.ZoomLevel = 7;
@@ -70,9 +77,10 @@ namespace UserControls
             // Disables the default mouse double-click action.
             e.Handled = true;
 
-            //Get the mouse click coordinates
+            // Get the mouse click coordinates
             var point = e.GetPosition(this);
-            //Convert the mouse coordinates to a location on the map
+
+            // Convert the mouse coordinates to a location on the map
             var location = this.Map.ViewportPointToLocation(point);
 
             if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
@@ -87,7 +95,7 @@ namespace UserControls
 
         private void DrawPin(Location location)
         {
-// The pushpin to add to the map.
+            // The pushpin to add to the map.
             var pin = new Pushpin()
             {
                 Location = location
@@ -122,42 +130,62 @@ namespace UserControls
 
         private async void PlanRoute_Click(object sender, RoutedEventArgs e)
         {
-            var start = this.startLocation;
-            var end = this.endLocation;
+            // Calculate the route and add to the route layer
+            var route = await BingMapsService.PlanRoute(this.startLocation, this.endLocation);
+            this.routeLayer.Children.Add(route);
 
-            this.DrawPin(start);
-            this.DrawPin(end);
-
-            var route = await BingMapsService.PlanRoute(start, end);
-
+            // Show the section of the map relating to the route
             var routeCentre = new LocationRect(route.Locations[0], route.Locations[route.Locations.Count - 1]);
-
-            this.Map.Children.Add(route);
             this.Map.SetView(routeCentre);
+
+            // Zoom out so that you can see the start and end pushpins
+            this.Map.ZoomLevel--;
+        }
+
+        private async void ClearRoute_Click(object sender, RoutedEventArgs e)
+        {
+            this.startLocation = null;
+            this.endLocation = null;
+            this.routeLayer.Children.Clear();
         }
 
         private void AddStartPoint(object sender, RoutedEventArgs e)
         {
-            // Get the mouse click coordinates
-            var point = Mouse.GetPosition(this);
+            this.startLocation = this.Map.ViewportPointToLocation(this.pointClicked);
 
-            this.startLocation = this.Map.ViewportPointToLocation(point);
+            // The pushpin to add to the map.
+            var startPin = new Pushpin()
+            {
+                Location = this.startLocation,
+                Tag = "start"
+            };
 
-            this.DrawPin(startLocation);
+            // Adds the pushpin to the map.
+            this.routeLayer.Children.Add(startPin);
 
-            ((MenuItem) sender).IsEnabled = false;
+            ((MenuItem)sender).IsEnabled = false;
         }
 
         private void AddEndPoint(object sender, RoutedEventArgs e)
         {
-            // Get the mouse click coordinates
-            var point = Mouse.GetPosition(this);
+            this.endLocation = this.Map.ViewportPointToLocation(this.pointClicked);
 
-            this.endLocation = this.Map.ViewportPointToLocation(point);
+            // The pushpin to add to the map.
+            var endPin = new Pushpin()
+            {
+                Location = this.endLocation,
+                Tag = "end"
+            };
 
-            this.DrawPin(endLocation);
-            
+            // Adds the pushpin to the map.
+            this.routeLayer.Children.Add(endPin);
+
             ((MenuItem)sender).IsEnabled = false;
+        }
+
+        private void mouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            this.pointClicked = e.GetPosition(this);
         }
     }
 }

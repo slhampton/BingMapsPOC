@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:m="clr-namespace:Microsoft.Maps.MapControl.WPF;assembly=Microsoft.Maps.MapControl.WPF">
-    <Grid>
+    <Grid MouseRightButtonDown="mouseRightButtonDown">
         <Grid.ContextMenu>
             <ContextMenu>
                 <MenuItem Uid="miStart" Click="AddStartPoint" Header="Add as start point"></MenuItem>
@@ -52,6 +52,9 @@
             </Button>
             <Button x:Name="btnPlanRoute" Click="PlanRoute_Click" Margin="5">
                 <TextBlock><Run Text="Plan Route"/></TextBlock>
+            </Button>
+            <Button x:Name="btnClearRoute" Click="ClearRoute_Click" Margin="5">
+                <TextBlock><Run Text="Clear Route"/></TextBlock>
             </Button>
         </StackPanel>
     </Grid>
