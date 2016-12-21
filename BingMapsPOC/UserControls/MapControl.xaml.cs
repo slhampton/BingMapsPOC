@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Maps.MapControl.WPF;
 using Microsoft.Maps.MapControl.WPF.Design;
@@ -84,7 +84,7 @@ namespace UserControls
             {
                 var lat = random.Next(52, 56);
                 var lon = random.Next(-7, 0);
-                layer.Children.Add(new Pushpin { Location = new Location(lat, lon) });
+                DrawCustomPin(new Location(lat, lon), layer);
             }
         }
         
@@ -136,7 +136,7 @@ namespace UserControls
 
             if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
-                DrawCar(location);
+                AddSymbol(location);
             }
             else
             {
@@ -155,7 +155,7 @@ namespace UserControls
             this.Map.Children.Add(pin);
         }
 
-        private void DrawCar(Location location)
+        private void DrawCustomPin(Location location, MapLayer layer)
         {
             const double radius = 20.0;
             var finalImage = new Image
@@ -165,7 +165,28 @@ namespace UserControls
             };
             var logo = new BitmapImage();
             logo.BeginInit();
-            logo.UriSource = new Uri("SUV-48.png", UriKind.Relative);
+            logo.UriSource = new Uri(Symbol.GetImageLocation(layer.Tag.ToString()), UriKind.Relative);
+            logo.EndInit();
+            finalImage.Source = logo;
+
+            var tt = new ToolTip { Content = $"CaseNo = {random.Next(10000, 99999)}" };
+            finalImage.ToolTip = tt;
+
+            MapLayer.SetPosition(finalImage, location);
+            layer.Children.Add(finalImage);
+        }
+
+        private void AddSymbol(Location location)
+        {
+            const double radius = 20.0;
+            var finalImage = new Image
+            {
+                Width = radius * 2,
+                Height = radius * 2
+            };
+            var logo = new BitmapImage();
+            logo.BeginInit();
+            logo.UriSource = new Uri("Icons\\SUV-48.png", UriKind.Relative);
             logo.EndInit();
             finalImage.Source = logo;
 
