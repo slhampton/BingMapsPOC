@@ -154,7 +154,7 @@ namespace UserControls
             this.routeLayer.Children.Add(route);
 
             // Show the section of the map relating to the route
-            var routeCentre = new LocationRect(route.Locations[0], route.Locations[route.Locations.Count - 1]);
+            var routeCentre = new LocationRect(route.Locations);
             this.Map.SetView(routeCentre);
 
             // Zoom out so that you can see the start and end pushpins

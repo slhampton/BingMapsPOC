@@ -92,7 +92,7 @@ namespace UserControls.Services
                 //Create a MapPolyline of the route and add it to the map
                 routeLine = new MapPolyline
                 {
-                    Stroke = new SolidColorBrush(Colors.Blue),
+                    Stroke = new SolidColorBrush(Colors.Green),
                     StrokeThickness = 5,
                     Opacity = 0.7,
                     Locations = locations
