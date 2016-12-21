@@ -21,6 +21,7 @@ namespace UserControls
         readonly LocationConverter locationConverter = new LocationConverter();
         private Location endLocation;
         private Location startLocation;
+        private readonly MapLayer baseLayer;
         private readonly MapLayer routeLayer;
         private Point pointClicked;
         private readonly List<Location> stopLocations = new List<Location>();
@@ -31,7 +32,9 @@ namespace UserControls
         {
             InitializeComponent();
 
-            this.routeLayer = new MapLayer() { Tag = "route" };
+            this.baseLayer = new MapLayer { Tag = "base" };
+            this.routeLayer = new MapLayer { Tag = "route" };
+            this.Map.Children.Add(this.baseLayer);
             this.Map.Children.Add(this.routeLayer);
 
             this.AddLayers();
@@ -136,7 +139,7 @@ namespace UserControls
 
             if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
-                AddSymbol(location);
+                DrawCustomPin(location, this.baseLayer);
             }
             else
             {
@@ -152,7 +155,7 @@ namespace UserControls
                 Location = location
             };
             // Adds the pushpin to the map.
-            this.Map.Children.Add(pin);
+            this.baseLayer.Children.Add(pin);
         }
 
         private void DrawCustomPin(Location location, MapLayer layer)
@@ -174,30 +177,6 @@ namespace UserControls
 
             MapLayer.SetPosition(finalImage, location);
             layer.Children.Add(finalImage);
-        }
-
-        private void AddSymbol(Location location)
-        {
-            const double radius = 20.0;
-            var finalImage = new Image
-            {
-                Width = radius * 2,
-                Height = radius * 2
-            };
-            var logo = new BitmapImage();
-            logo.BeginInit();
-            logo.UriSource = new Uri("Icons\\SUV-48.png", UriKind.Relative);
-            logo.EndInit();
-            finalImage.Source = logo;
-
-            var tt = new ToolTip { Content = "CaseNo = 12345" };
-            finalImage.ToolTip = tt;
-
-            var p0 = this.Map.LocationToViewportPoint(location);
-            var p1 = new Point(p0.X - radius, p0.Y - radius);
-            var loc = this.Map.ViewportPointToLocation(p1);
-            MapLayer.SetPosition(finalImage, loc);
-            this.Map.Children.Add(finalImage);
         }
 
         private async void PlanRoute_Click(object sender, RoutedEventArgs e)
