@@ -1,10 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Microsoft.Maps.MapControl.WPF;
 using Microsoft.Maps.MapControl.WPF.Design;
 using UserControls.Services;
@@ -21,15 +20,67 @@ namespace UserControls
         readonly LocationConverter locationConverter = new LocationConverter();
         private Location endLocation;
         private Location startLocation;
+        private List<MapLayer> InitialLayers = new List<MapLayer>();
+        private Random random = new Random();
 
         public MapControl()
         {
             InitializeComponent();
 
+            this.AddLayers();
+
             this.Map.Center = new Location(53, -5);
             this.Map.ZoomLevel = 7;
-
         }
+
+        private void AddLayers()
+        {
+            InitialLayers.AddRange(new List<MapLayer>
+            {
+                new MapLayer { Tag = "car" } ,
+                new MapLayer { Tag = "pcc" },
+                new MapLayer { Tag = "home" }
+            });
+
+            foreach (var layer in InitialLayers)
+            {
+                this.AddPins(layer);
+                this.Map.Children.Add(layer);
+            }
+        }
+
+        private void HideLayer(string layerToRemove)
+        {
+            foreach (var layer in InitialLayers)
+            {
+                if (layer.Tag.ToString() == layerToRemove)
+                {
+                    layer.Visibility = Visibility.Hidden;
+                }
+            }
+        }
+
+        private void ShowLayer(string layerToRemove)
+        {
+            foreach (var layer in InitialLayers)
+            {
+                if (layer.Tag.ToString() == layerToRemove)
+                {
+                    layer.Visibility = Visibility.Visible;
+                }
+            }
+        }
+
+        private void AddPins(MapLayer layer)
+        {
+            for (var i = 0; i < 3; i++)
+            {
+                var lat = random.Next(52, 56);
+                var lon = random.Next(-7, 0);
+                layer.Children.Add(new Pushpin { Location = new Location(lat, lon) });
+            }
+        }
+        
 
         private void ChangeMapView_Click(object sender, RoutedEventArgs e)
         {
@@ -87,8 +138,8 @@ namespace UserControls
 
         private void DrawPin(Location location)
         {
-// The pushpin to add to the map.
-            var pin = new Pushpin()
+            // The pushpin to add to the map.
+            var pin = new Pushpin
             {
                 Location = location
             };
@@ -158,6 +209,18 @@ namespace UserControls
             this.DrawPin(endLocation);
             
             ((MenuItem)sender).IsEnabled = false;
+        }
+
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            var layer = ((CheckBox)sender).Tag.ToString();
+            HideLayer(layer);
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            var layer = ((CheckBox)sender).Tag.ToString();
+            ShowLayer(layer);
         }
     }
 }

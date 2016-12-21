@@ -22,15 +22,7 @@
                Grid.RowSpan="2" 
                CredentialsProvider="AsJ2NC7HdNc4k8T03GPuBT5IwzYUJATkSTWfaog7uEJ0lsx_XLS3st1ZStjitTm2"
                MouseDoubleClick="MapWithPushpins_MouseDoubleClick" />
-        <StackPanel Orientation="Horizontal" Opacity="0.7" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Top">
-            <CheckBox x:Name="checkBox1" HorizontalAlignment="Left" Height="61" VerticalAlignment="Top" Width="21" Margin="0,0,0,2"/>
-            <Label x:Name="label1" Content="Cars" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"/>
-            <CheckBox x:Name="checkBox2" HorizontalAlignment="Left" Height="61" VerticalAlignment="Top" Width="21" Margin="0,0,0,2"/>
-            <Label x:Name="label2" Content="Home Visits" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"/>
-            <CheckBox x:Name="checkBox3" HorizontalAlignment="Left" Height="61" VerticalAlignment="Top" Width="21" Margin="0,0,0,2"/>
-            <Label x:Name="label3" Content="PCCs" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"/>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" Opacity="0.7" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Opacity="0.7" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center">
             <Button x:Name="btn1" Click="ChangeMapView_Click" Tag="39.3683,-95.2734,0.0000 4.0000"
                      Margin="5">
                 <TextBlock><Run Text="1"/></TextBlock>
@@ -53,6 +45,17 @@
             <Button x:Name="btnPlanRoute" Click="PlanRoute_Click" Margin="5">
                 <TextBlock><Run Text="Plan Route"/></TextBlock>
             </Button>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Opacity="0.7" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Top">
+            <CheckBox x:Name="checkBox1" Tag="car" IsChecked="True" Height="61" VerticalAlignment="Top" Width="21" Margin="0,0,0,2" Checked="CheckBox_Checked"
+	    Unchecked="CheckBox_Unchecked" />
+            <Label x:Name="label1" Content="Cars" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"/>
+            <CheckBox x:Name="checkBox2" Tag="home" IsChecked="True" Height="61" VerticalAlignment="Top" Width="21" Margin="0,0,0,2" Checked="CheckBox_Checked"
+	    Unchecked="CheckBox_Unchecked" />
+            <Label x:Name="label2" Content="Home Visits" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"/>
+            <CheckBox x:Name="checkBox3" Tag="pcc" IsChecked="True" Height="61" VerticalAlignment="Top" Width="21" Margin="0,0,0,2" Checked="CheckBox_Checked"
+	    Unchecked="CheckBox_Unchecked" />
+            <Label x:Name="label3" Content="PCCs" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"/>
         </StackPanel>
     </Grid>
 </UserControl>
