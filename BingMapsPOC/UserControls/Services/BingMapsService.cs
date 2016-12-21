@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Drawing;
@@ -46,10 +47,24 @@ namespace UserControls.Services
             return img;
         }
 
-        public static async Task<MapPolyline> PlanRoute(Microsoft.Maps.MapControl.WPF.Location from, Microsoft.Maps.MapControl.WPF.Location to)
+        public static async Task<MapPolyline> PlanRoute(Microsoft.Maps.MapControl.WPF.Location startPoint, Microsoft.Maps.MapControl.WPF.Location endPoint, List<Microsoft.Maps.MapControl.WPF.Location> viaWaypointLocations)
         {
-            var uri = new Uri($"{BaseUrl}/Routes/Driving?wp.0={from}&wp.1={to}&rpo=Points&key={BingApiKey}");
-            var routeLine = new MapPolyline();
+            var viaWaypoints = string.Empty;
+            var waypointIndex = 1;
+
+            // Add via waypoints
+            if (viaWaypointLocations != null)
+            {
+                foreach (var waypointLocation in viaWaypointLocations)
+                {
+                    viaWaypoints += $"vwp.{waypointIndex}={waypointLocation}&";
+                    // Increment the waypoint / viaWaypoint index
+                    waypointIndex++;
+                }
+            }
+
+            var uri = new Uri($"{BaseUrl}/Routes/Driving?wp.0={startPoint}&{viaWaypoints}wp.{waypointIndex}={endPoint}&rpo=Points&key={BingApiKey}");
+            MapPolyline routeLine = null;
 
             //Make a request and get the response
             var r = await GetResponse(uri);

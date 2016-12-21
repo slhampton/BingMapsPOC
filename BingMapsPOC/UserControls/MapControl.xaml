@@ -7,8 +7,9 @@
     <Grid MouseRightButtonDown="mouseRightButtonDown">
         <Grid.ContextMenu>
             <ContextMenu>
-                <MenuItem Uid="miStart" Click="AddStartPoint" Header="Add as start point"></MenuItem>
-                <MenuItem Uid="miEnd" Click="AddEndPoint" Header="Add as end point"></MenuItem>
+                <MenuItem Name="Start" Click="AddStartPoint" Header="Add as start point"></MenuItem>
+                <MenuItem Name="End" Click="AddEndPoint" Header="Add as end point"></MenuItem>
+                <MenuItem Name="Stop" Click="AddStop" Header="Add stop"></MenuItem>
             </ContextMenu>
         </Grid.ContextMenu>
         <Grid.RowDefinitions>

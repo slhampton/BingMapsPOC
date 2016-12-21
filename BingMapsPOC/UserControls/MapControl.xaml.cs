@@ -25,6 +25,7 @@ namespace UserControls
         private Location startLocation;
         private readonly MapLayer routeLayer;
         private Point pointClicked;
+        private readonly List<Location> stopLocations = new List<Location>();
 
         public MapControl()
         {
@@ -130,8 +131,26 @@ namespace UserControls
 
         private async void PlanRoute_Click(object sender, RoutedEventArgs e)
         {
+            // Check that we have a start and end location
+            if (this.startLocation == null)
+            {
+                MessageBox.Show("A start location is required.");
+                return;
+            }
+
+            if (this.endLocation == null)
+            {
+                MessageBox.Show("A end location is required.");
+                return;
+            }
+
             // Calculate the route and add to the route layer
-            var route = await BingMapsService.PlanRoute(this.startLocation, this.endLocation);
+            var route = await BingMapsService.PlanRoute(this.startLocation, this.endLocation, this.stopLocations);
+            if (route == null)
+            {
+                MessageBox.Show("Error planing route.");
+                return;
+            }
             this.routeLayer.Children.Add(route);
 
             // Show the section of the map relating to the route
@@ -142,10 +161,12 @@ namespace UserControls
             this.Map.ZoomLevel--;
         }
 
-        private async void ClearRoute_Click(object sender, RoutedEventArgs e)
+        private void ClearRoute_Click(object sender, RoutedEventArgs e)
         {
             this.startLocation = null;
             this.endLocation = null;
+            this.Start.IsEnabled = true;
+            this.End.IsEnabled = true;
             this.routeLayer.Children.Clear();
         }
 
@@ -154,8 +175,9 @@ namespace UserControls
             this.startLocation = this.Map.ViewportPointToLocation(this.pointClicked);
 
             // The pushpin to add to the map.
-            var startPin = new Pushpin()
+            var startPin = new Pushpin
             {
+                Background = new SolidColorBrush(Colors.Green),
                 Location = this.startLocation,
                 Tag = "start"
             };
@@ -163,7 +185,7 @@ namespace UserControls
             // Adds the pushpin to the map.
             this.routeLayer.Children.Add(startPin);
 
-            ((MenuItem)sender).IsEnabled = false;
+            this.Start.IsEnabled = false;
         }
 
         private void AddEndPoint(object sender, RoutedEventArgs e)
@@ -171,8 +193,9 @@ namespace UserControls
             this.endLocation = this.Map.ViewportPointToLocation(this.pointClicked);
 
             // The pushpin to add to the map.
-            var endPin = new Pushpin()
+            var endPin = new Pushpin
             {
+                Background = new SolidColorBrush(Colors.Red),
                 Location = this.endLocation,
                 Tag = "end"
             };
@@ -180,7 +203,30 @@ namespace UserControls
             // Adds the pushpin to the map.
             this.routeLayer.Children.Add(endPin);
 
-            ((MenuItem)sender).IsEnabled = false;
+            this.End.IsEnabled = false;
+        }
+
+        private void AddStop(object sender, RoutedEventArgs e)
+        {
+            var stopLocation = this.Map.ViewportPointToLocation(this.pointClicked);
+            this.stopLocations.Add(stopLocation);
+
+            // The pushpin to add to the map.
+            var stopPin = new Pushpin
+            {
+                Background = new SolidColorBrush(Colors.Gray),
+                Location = stopLocation,
+                Tag = (stopLocations.Count + 1).ToString()
+            };
+
+            // Adds the pushpin to the map.
+            this.routeLayer.Children.Add(stopPin);
+
+            // We can only have 10 viaWaypoints (https://msdn.microsoft.com/en-us/library/ff701717.aspx)
+            if (stopLocations.Count == 10)
+            {
+                this.Stop.IsEnabled = false;
+            }
         }
 
         private void mouseRightButtonDown(object sender, MouseButtonEventArgs e)
