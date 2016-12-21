@@ -4,11 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:m="clr-namespace:Microsoft.Maps.MapControl.WPF;assembly=Microsoft.Maps.MapControl.WPF">
-    <Grid>
+    <Grid MouseRightButtonDown="mouseRightButtonDown">
         <Grid.ContextMenu>
             <ContextMenu>
-                <MenuItem Uid="miStart" Click="AddStartPoint" Header="Add as start point"></MenuItem>
-                <MenuItem Uid="miEnd" Click="AddEndPoint" Header="Add as end point"></MenuItem>
+                <MenuItem Header="Route">
+                    <MenuItem Name="Start" Click="AddStartPoint" Header="Add as start point"></MenuItem>
+                    <MenuItem Name="End" Click="AddEndPoint" Header="Add as end point"></MenuItem>
+                    <MenuItem Name="Stop" Click="AddStop" Header="Add stop"></MenuItem>
+                    <MenuItem Name="Plan" Click="PlanRoute_Click" Header="Plan Route"></MenuItem>
+                    <MenuItem Name="Clear" Click="ClearRoute_Click" Header="Clear Route"></MenuItem>
+                </MenuItem>
             </ContextMenu>
         </Grid.ContextMenu>
         <Grid.RowDefinitions>
@@ -41,9 +46,6 @@
             </Button>
             <Button x:Name="btnZoomOut" Click="ZoomOut_Click" Margin="5" Height="20">
                 <TextBlock><Run Text="-"/></TextBlock>
-            </Button>
-            <Button x:Name="btnPlanRoute" Click="PlanRoute_Click" Margin="5">
-                <TextBlock><Run Text="Plan Route"/></TextBlock>
             </Button>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Opacity="0.7" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Top">

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -20,12 +21,18 @@ namespace UserControls
         readonly LocationConverter locationConverter = new LocationConverter();
         private Location endLocation;
         private Location startLocation;
+        private readonly MapLayer routeLayer;
+        private Point pointClicked;
+        private readonly List<Location> stopLocations = new List<Location>();
         private List<MapLayer> InitialLayers = new List<MapLayer>();
         private Random random = new Random();
 
         public MapControl()
         {
             InitializeComponent();
+
+            this.routeLayer = new MapLayer() { Tag = "route" };
+            this.Map.Children.Add(this.routeLayer);
 
             this.AddLayers();
 
@@ -121,9 +128,10 @@ namespace UserControls
             // Disables the default mouse double-click action.
             e.Handled = true;
 
-            //Get the mouse click coordinates
+            // Get the mouse click coordinates
             var point = e.GetPosition(this);
-            //Convert the mouse coordinates to a location on the map
+
+            // Convert the mouse coordinates to a location on the map
             var location = this.Map.ViewportPointToLocation(point);
 
             if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
@@ -173,42 +181,107 @@ namespace UserControls
 
         private async void PlanRoute_Click(object sender, RoutedEventArgs e)
         {
-            var start = this.startLocation;
-            var end = this.endLocation;
+            // Check that we have a start and end location
+            if (this.startLocation == null)
+            {
+                MessageBox.Show("A start location is required.");
+                return;
+            }
 
-            this.DrawPin(start);
-            this.DrawPin(end);
+            if (this.endLocation == null)
+            {
+                MessageBox.Show("A end location is required.");
+                return;
+            }
 
-            var route = await BingMapsService.PlanRoute(start, end);
+            // Calculate the route and add to the route layer
+            var route = await BingMapsService.PlanRoute(this.startLocation, this.endLocation, this.stopLocations);
+            if (route == null)
+            {
+                MessageBox.Show("Error planing route.");
+                return;
+            }
+            this.routeLayer.Children.Add(route);
 
-            var routeCentre = new LocationRect(route.Locations[0], route.Locations[route.Locations.Count - 1]);
-
-            this.Map.Children.Add(route);
+            // Show the section of the map relating to the route
+            var routeCentre = new LocationRect(route.Locations);
             this.Map.SetView(routeCentre);
+
+            // Zoom out so that you can see the start and end pushpins
+            this.Map.ZoomLevel--;
+        }
+
+        private void ClearRoute_Click(object sender, RoutedEventArgs e)
+        {
+            this.startLocation = null;
+            this.endLocation = null;
+            this.Start.IsEnabled = true;
+            this.End.IsEnabled = true;
+            this.routeLayer.Children.Clear();
         }
 
         private void AddStartPoint(object sender, RoutedEventArgs e)
         {
-            // Get the mouse click coordinates
-            var point = Mouse.GetPosition(this);
+            this.startLocation = this.Map.ViewportPointToLocation(this.pointClicked);
 
-            this.startLocation = this.Map.ViewportPointToLocation(point);
+            // The pushpin to add to the map.
+            var startPin = new Pushpin
+            {
+                Background = new SolidColorBrush(Colors.Green),
+                Location = this.startLocation,
+                Tag = "start"
+            };
 
-            this.DrawPin(startLocation);
+            // Adds the pushpin to the map.
+            this.routeLayer.Children.Add(startPin);
 
-            ((MenuItem) sender).IsEnabled = false;
+            this.Start.IsEnabled = false;
         }
 
         private void AddEndPoint(object sender, RoutedEventArgs e)
         {
-            // Get the mouse click coordinates
-            var point = Mouse.GetPosition(this);
+            this.endLocation = this.Map.ViewportPointToLocation(this.pointClicked);
 
-            this.endLocation = this.Map.ViewportPointToLocation(point);
+            // The pushpin to add to the map.
+            var endPin = new Pushpin
+            {
+                Background = new SolidColorBrush(Colors.Red),
+                Location = this.endLocation,
+                Tag = "end"
+            };
 
-            this.DrawPin(endLocation);
-            
-            ((MenuItem)sender).IsEnabled = false;
+            // Adds the pushpin to the map.
+            this.routeLayer.Children.Add(endPin);
+
+            this.End.IsEnabled = false;
+        }
+
+        private void AddStop(object sender, RoutedEventArgs e)
+        {
+            var stopLocation = this.Map.ViewportPointToLocation(this.pointClicked);
+            this.stopLocations.Add(stopLocation);
+
+            // The pushpin to add to the map.
+            var stopPin = new Pushpin
+            {
+                Background = new SolidColorBrush(Colors.Gray),
+                Location = stopLocation,
+                Tag = (stopLocations.Count + 1).ToString()
+            };
+
+            // Adds the pushpin to the map.
+            this.routeLayer.Children.Add(stopPin);
+
+            // We can only have 10 viaWaypoints (https://msdn.microsoft.com/en-us/library/ff701717.aspx)
+            if (stopLocations.Count == 10)
+            {
+                this.Stop.IsEnabled = false;
+            }
+        }
+
+        private void mouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            this.pointClicked = e.GetPosition(this);
         }
 
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
