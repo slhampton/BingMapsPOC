@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Maps.MapControl.WPF;
 using Microsoft.Maps.MapControl.WPF.Design;
 using UserControls.Services;
+using Image = System.Windows.Controls.Image;
 using Location = Microsoft.Maps.MapControl.WPF.Location;
 using Point = System.Windows.Point;
 
@@ -33,15 +38,16 @@ namespace UserControls
         private Location center;
         private MapPolygon currentShape;
         private MapPolyline routeLine;
-        private List<ItineraryItem> instructions;
+        private string instructions;
+        private Route route;
 
         public MapControl()
         {
             InitializeComponent();
 
-            this.drawLayer = new MapLayer { Tag = "draw" };
-            this.baseLayer = new MapLayer { Tag = "base" };
-            this.routeLayer = new MapLayer { Tag = "route" };
+            this.drawLayer = new MapLayer {Tag = "draw"};
+            this.baseLayer = new MapLayer {Tag = "base"};
+            this.routeLayer = new MapLayer {Tag = "route"};
             this.Map.Children.Add(this.baseLayer);
             this.Map.Children.Add(this.drawLayer);
             this.Map.Children.Add(this.routeLayer);
@@ -57,9 +63,9 @@ namespace UserControls
         {
             InitialLayers.AddRange(new List<MapLayer>
             {
-                new MapLayer { Tag = "car" } ,
-                new MapLayer { Tag = "pcc" },
-                new MapLayer { Tag = "home" }
+                new MapLayer {Tag = "car"},
+                new MapLayer {Tag = "pcc"},
+                new MapLayer {Tag = "home"}
             });
 
             foreach (var layer in InitialLayers)
@@ -105,7 +111,7 @@ namespace UserControls
         private void ChangeMapView_Click(object sender, RoutedEventArgs e)
         {
             // Parse the information of the button's Tag property
-            var tagInfo = ((Button)sender).Tag.ToString().Split(' ');
+            var tagInfo = ((Button) sender).Tag.ToString().Split(' ');
             Location center;
             double zoom;
 
@@ -113,11 +119,11 @@ namespace UserControls
             {
                 center = this.Map.Center;
                 zoom = this.Map.ZoomLevel;
-                ((Button)sender).Tag = $"{center.Latitude},{center.Longitude},{center.Altitude} {zoom}";
+                ((Button) sender).Tag = $"{center.Latitude},{center.Longitude},{center.Altitude} {zoom}";
             }
             else
             {
-                center = (Location)locationConverter.ConvertFrom(tagInfo[0]);
+                center = (Location) locationConverter.ConvertFrom(tagInfo[0]);
                 zoom = System.Convert.ToDouble(tagInfo[1]);
 
                 // Set the map view
@@ -177,8 +183,8 @@ namespace UserControls
             const double radius = 20.0;
             var finalImage = new Image
             {
-                Width = radius * 2,
-                Height = radius * 2
+                Width = radius*2,
+                Height = radius*2
             };
             var logo = new BitmapImage();
             logo.BeginInit();
@@ -186,7 +192,7 @@ namespace UserControls
             logo.EndInit();
             finalImage.Source = logo;
 
-            var tt = new ToolTip { Content = $"CaseNo = {random.Next(10000, 99999)}" };
+            var tt = new ToolTip {Content = $"CaseNo = {random.Next(10000, 99999)}"};
             finalImage.ToolTip = tt;
 
             MapLayer.SetPosition(finalImage, location);
@@ -209,7 +215,7 @@ namespace UserControls
             }
 
             // Calculate the route
-            var route = await BingMapsService.PlanRoute(this.startLocation, this.endLocation, this.stopLocations);
+            this.route = await BingMapsService.PlanRoute(this.startLocation, this.endLocation, this.stopLocations);
 
             if (route == null)
             {
@@ -234,7 +240,6 @@ namespace UserControls
 
         private void WriteInstructions(Route route)
         {
-
             var durationTimeSpan = TimeSpan.FromSeconds(route.TravelDuration);
             var travelDurationAsString = new StringBuilder(string.Empty);
             if (durationTimeSpan.Hours > 0)
@@ -243,10 +248,24 @@ namespace UserControls
             }
             travelDurationAsString.Append($"{durationTimeSpan.Minutes} minutes");
 
+            var sb = new StringBuilder();
+
             this.Distance.Text = $"Total distance: {route.TravelDistance} {route.DistanceUnit.ToLower()}";
             this.Duration.Text = $"Total duration: {travelDurationAsString}";
 
+            sb.AppendLine(this.Distance.Text);
+            sb.AppendLine(this.Duration.Text);
+
             RouteResults.DataContext = route;
+            foreach (var leg in route.RouteLegs)
+            {
+                foreach (var item in leg.ItineraryItems)
+                {
+                    sb.AppendLine($"{item.Instruction.Text} {item.TravelDistance}kms");
+                }
+            }
+
+            this.instructions = sb.ToString();
             this.InstructionsColumn.Width = new GridLength(225);
         }
 
@@ -346,6 +365,7 @@ namespace UserControls
         {
             this.pointClicked = e.GetPosition(this.Map);
         }
+
         private void NodeSelected(object sender, MouseButtonEventArgs e)
         {
             //this.pointClicked = e.GetPosition(this);
@@ -378,13 +398,13 @@ namespace UserControls
 
         private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            var layer = ((CheckBox)sender).Tag.ToString();
+            var layer = ((CheckBox) sender).Tag.ToString();
             HideLayer(layer);
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            var layer = ((CheckBox)sender).Tag.ToString();
+            var layer = ((CheckBox) sender).Tag.ToString();
             ShowLayer(layer);
         }
 
@@ -470,6 +490,61 @@ namespace UserControls
         private void ZoomToSelection_Click(object sender, RoutedEventArgs e)
         {
             throw new NotImplementedException();
+        }
+
+        private void Copy_OnClick(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(this.instructions);
+        }
+
+        private void Print_OnClick(object sender, RoutedEventArgs e)
+        {
+            var printDlg = new PrintDialog();
+            var doc = this.CreateFlowDocument();
+            doc.Name = "FlowDoc";
+
+            IDocumentPaginatorSource idpSource = doc;
+
+            if (printDlg.ShowDialog() == true)
+            {
+                printDlg.PrintDocument(idpSource.DocumentPaginator, "Bing Maps.");
+            }
+        }
+
+        private FlowDocument CreateFlowDocument()
+        {
+            FlowDocument doc = new FlowDocument();
+
+            var mapSection = new Section();
+            //mapSection.Blocks.Add(new BlockUIContainer(finalImage));
+            var textSection = new Section();
+            var table = new Table();
+            textSection.Blocks.Add(table);
+            doc.Blocks.Add(mapSection);
+            doc.Blocks.Add(textSection);
+            
+            var rowGroup = new TableRowGroup();
+            var instructionsColumn = new TableColumn();
+            instructionsColumn.Width = new GridLength(7, GridUnitType.Star);
+            var distanceColumn = new TableColumn();
+            distanceColumn.Width = new GridLength(1, GridUnitType.Star);
+            
+            table.Columns.Add(instructionsColumn);
+            table.Columns.Add(distanceColumn);
+            table.RowGroups.Add(rowGroup);
+
+            foreach (var leg in route.RouteLegs)
+            {
+                foreach (var item in leg.ItineraryItems)
+                {
+                    var row = new TableRow();
+                    row.Cells.Add(new TableCell(new Paragraph(new Run(item.Instruction.Text))));
+                    row.Cells.Add(new TableCell(new Paragraph(new Run(item.TravelDistance.ToString(CultureInfo.InvariantCulture)))));
+                    rowGroup.Rows.Add(row);
+                }
+            }
+
+            return doc;
         }
     }
 }

@@ -34,7 +34,7 @@
 			<StackPanel Name="RouteResults" Orientation="Vertical" >
 				<TextBlock Name="Distance" />
 				<TextBlock Name="Duration" />
-				<ListBox ItemsSource="{Binding RouteLegs}" Width="200">
+				<ListBox Name="DirectionsListbox" ItemsSource="{Binding RouteLegs}" Width="200">
 					<ListBox.ItemTemplate>
 						<DataTemplate>
 							<ListBox ItemsSource="{Binding ItineraryItems}" MouseRightButtonDown="NodeSelected">
@@ -42,8 +42,8 @@
 									<ContextMenu>
 										<MenuItem Name="Zoom" Header="Zoom to Selection" Click="ZoomToSelection_Click"></MenuItem>
                                         <MenuItem Name="Nearby" Header="Find Nearby Places"></MenuItem>
-                                        <MenuItem Name="Copy" Header="Copy Directions"></MenuItem>
-                                        <MenuItem Name="Print" Header="Print"></MenuItem>
+                                        <MenuItem Name="Copy" Header="Copy Directions" Click="Copy_OnClick"></MenuItem>
+                                        <MenuItem Name="Print" Header="Print" Click="Print_OnClick"></MenuItem>
 									</ContextMenu>
 								</ListBox.ContextMenu>
 								<ListBox.ItemTemplate>
