@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -31,12 +32,14 @@ namespace UserControls
         private bool isDrawing = false;
         private Location center;
         private MapPolygon currentShape;
+        private MapPolyline routeLine;
+        private List<ItineraryItem> instructions;
 
         public MapControl()
         {
             InitializeComponent();
 
-            this.drawLayer = new MapLayer {Tag = "draw"};
+            this.drawLayer = new MapLayer { Tag = "draw" };
             this.baseLayer = new MapLayer { Tag = "base" };
             this.routeLayer = new MapLayer { Tag = "route" };
             this.Map.Children.Add(this.baseLayer);
@@ -47,6 +50,7 @@ namespace UserControls
 
             this.Map.Center = new Location(53, -5);
             this.Map.ZoomLevel = 7;
+            this.InstructionsColumn.Width = new GridLength(0);
         }
 
         private void AddLayers()
@@ -96,7 +100,7 @@ namespace UserControls
                 DrawCustomPin(new Location(lat, lon), layer);
             }
         }
-        
+
 
         private void ChangeMapView_Click(object sender, RoutedEventArgs e)
         {
@@ -119,7 +123,6 @@ namespace UserControls
                 // Set the map view
                 this.Map.SetView(center, zoom);
             }
-
         }
 
         private void ZoomIn_Click(object sender, RoutedEventArgs e)
@@ -146,7 +149,7 @@ namespace UserControls
             e.Handled = true;
 
             // Convert the mouse coordinates to a location on the map
-            var location = this.Map.ViewportPointToLocation(e.GetPosition(this));
+            var location = this.Map.ViewportPointToLocation(e.GetPosition(this.Map));
 
             if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
@@ -205,25 +208,74 @@ namespace UserControls
                 return;
             }
 
-            // Calculate the route and add to the route layer
+            // Calculate the route
             var route = await BingMapsService.PlanRoute(this.startLocation, this.endLocation, this.stopLocations);
+
             if (route == null)
             {
                 MessageBox.Show("Error planing route.");
                 return;
             }
-            this.routeLayer.Children.Add(route);
+
+            // Remove any existing route, calculate the new route and add it to the route layer
+            this.routeLayer.Children.Remove(this.routeLine);
+            this.CalculateRouteLine(route);
+            this.routeLayer.Children.Add(this.routeLine);
+
+            WriteInstructions(route);
 
             // Show the section of the map relating to the route
-            var routeCentre = new LocationRect(route.Locations);
+            var routeCentre = new LocationRect(this.routeLine.Locations);
             this.Map.SetView(routeCentre);
 
-            // Zoom out so that you can see the start and end pushpins
+            // Zoom out so that you can see all route pushpins
             this.Map.ZoomLevel--;
+        }
+
+        private void WriteInstructions(Route route)
+        {
+
+            var durationTimeSpan = TimeSpan.FromSeconds(route.TravelDuration);
+            var travelDurationAsString = new StringBuilder(string.Empty);
+            if (durationTimeSpan.Hours > 0)
+            {
+                travelDurationAsString.Append($"{durationTimeSpan.Hours} hours, ");
+            }
+            travelDurationAsString.Append($"{durationTimeSpan.Minutes} minutes");
+
+            this.Distance.Text = $"Total distance: {route.TravelDistance} {route.DistanceUnit.ToLower()}";
+            this.Duration.Text = $"Total duration: {travelDurationAsString}";
+
+            RouteResults.DataContext = route;
+            this.InstructionsColumn.Width = new GridLength(225);
+        }
+
+        private void CalculateRouteLine(Route route)
+        {
+            var routePath = route.RoutePath.Line.Coordinates;
+            var locations = new LocationCollection();
+
+            foreach (var coordinates in routePath)
+            {
+                if (coordinates.Length >= 2)
+                {
+                    locations.Add(new Location(coordinates[0], coordinates[1]));
+                }
+            }
+
+            // Create a MapPolyline of the route and add it to the map
+            this.routeLine = new MapPolyline
+            {
+                Stroke = new SolidColorBrush(Colors.Green),
+                StrokeThickness = 5,
+                Opacity = 0.7,
+                Locations = locations
+            };
         }
 
         private void ClearRoute_Click(object sender, RoutedEventArgs e)
         {
+            this.InstructionsColumn.Width = new GridLength(0);
             this.startLocation = null;
             this.endLocation = null;
             this.Start.IsEnabled = true;
@@ -290,9 +342,13 @@ namespace UserControls
             }
         }
 
-        private void mouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private void PointSelected(object sender, MouseButtonEventArgs e)
         {
-            this.pointClicked = e.GetPosition(this);
+            this.pointClicked = e.GetPosition(this.Map);
+        }
+        private void NodeSelected(object sender, MouseButtonEventArgs e)
+        {
+            //this.pointClicked = e.GetPosition(this);
         }
 
         private void mouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -391,14 +447,14 @@ namespace UserControls
 
         private void MouseTouchEndHandler(object sender, MouseButtonEventArgs e)
         {
-            //Update drawing flag so that polygon isn't updated when mouse is moved.
+            // Update drawing flag so that polygon isn't updated when mouse is moved.
             isDrawing = false;
         }
 
         private void ViewChangeOnFrame(object sender, MapEventArgs e)
         {
-            //If drawing keep reseting the center to the original center value when we entered drawing mode. 
-            //This will disable panning of the map when we click and drag. 
+            // If drawing keep reseting the center to the original center value when we entered drawing mode. 
+            // This will disable panning of the map when we click and drag. 
             this.Map.Center = center;
         }
 
@@ -409,6 +465,11 @@ namespace UserControls
             this.Map.TryViewportPointToLocation(e.GetPosition(this.Map), out loc);
 
             return loc;
+        }
+
+        private void ZoomToSelection_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 }

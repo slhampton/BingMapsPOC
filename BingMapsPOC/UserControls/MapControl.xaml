@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:m="clr-namespace:Microsoft.Maps.MapControl.WPF;assembly=Microsoft.Maps.MapControl.WPF">
-    <Grid MouseRightButtonDown="mouseRightButtonDown">
+    <Grid Name="MapViewGrid" MouseRightButtonDown="PointSelected">
         <Grid.ContextMenu>
             <ContextMenu>
                 <MenuItem Header="Zoom">
@@ -21,19 +21,56 @@
                 <MenuItem Name="Draw" Click="DrawArea_Click" Header="Draw Area"></MenuItem>
             </ContextMenu>
         </Grid.ContextMenu>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Name="InstructionsColumn" Width="200"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="40" />
             <RowDefinition Height="40" />
         </Grid.RowDefinitions>
-        <m:Map Name="Map" 
-               Grid.Column="0" 
+        <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.RowSpan="3">
+			<StackPanel Name="RouteResults" Orientation="Vertical" >
+				<TextBlock Name="Distance" />
+				<TextBlock Name="Duration" />
+				<ListBox ItemsSource="{Binding RouteLegs}" Width="200">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<ListBox ItemsSource="{Binding ItineraryItems}" MouseRightButtonDown="NodeSelected">
+								<ListBox.ContextMenu>
+									<ContextMenu>
+										<MenuItem Name="Zoom" Header="Zoom to Selection" Click="ZoomToSelection_Click"></MenuItem>
+                                        <MenuItem Name="Nearby" Header="Find Nearby Places"></MenuItem>
+                                        <MenuItem Name="Copy" Header="Copy Directions"></MenuItem>
+                                        <MenuItem Name="Print" Header="Print"></MenuItem>
+									</ContextMenu>
+								</ListBox.ContextMenu>
+								<ListBox.ItemTemplate>
+									<DataTemplate>
+										<StackPanel Orientation="Horizontal">
+											<TextBlock Text="{Binding Instruction.Text}"
+												TextWrapping="Wrap" Width="130"/>
+											<TextBlock Text="{Binding TravelDistance}"
+												Margin="10,0,0,0" Width="15" />
+											<TextBlock Text="km"/>
+										</StackPanel>
+									</DataTemplate>
+								</ListBox.ItemTemplate>
+							</ListBox>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</StackPanel>
+		</ScrollViewer>
+		<m:Map Name="Map" 
+               Grid.Column="1" 
                Grid.Row="0" 
                Grid.RowSpan="2" 
                CredentialsProvider="AsJ2NC7HdNc4k8T03GPuBT5IwzYUJATkSTWfaog7uEJ0lsx_XLS3st1ZStjitTm2"
                MouseDoubleClick="MapWithPushpins_MouseDoubleClick" 
                MouseLeftButtonUp="mouseLeftButtonUp" />
-        <StackPanel Orientation="Horizontal" Opacity="0.7" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Opacity="0.7" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center">
             <Button x:Name="btn1" Click="ChangeMapView_Click" Tag="39.3683,-95.2734,0.0000 4.0000"
                      Margin="5">
                 <TextBlock><Run Text="1"/></TextBlock>
@@ -54,7 +91,7 @@
                 <TextBlock><Run Text="-"/></TextBlock>
             </Button>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Opacity="0.7" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Top">
+        <StackPanel Orientation="Horizontal" Opacity="0.7" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Top">
             <CheckBox x:Name="checkBox1" Tag="car" IsChecked="True" Height="61" VerticalAlignment="Top" Width="21" Margin="0,0,0,2" Checked="CheckBox_Checked"
 	    Unchecked="CheckBox_Unchecked" />
             <Label x:Name="label1" Content="Cars" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"/>
