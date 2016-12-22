@@ -71,6 +71,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Services\BingMapsService.cs" />
+    <Compile Include="Services\BingSpatialDataService.cs" />
     <Compile Include="Services\DataContracts.cs" />
     <Compile Include="Symbol.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
