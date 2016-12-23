@@ -544,5 +544,15 @@ namespace UserControls
             this.Map.Center = new Location(this.instructionPoint.Coordinates[0], this.instructionPoint.Coordinates[1]);
             this.Map.ZoomLevel = 16;
         }
+
+        private void FindNearby_Click(object sender, RoutedEventArgs e)
+        {
+            var rect = new LocationRect { South = 51.2, West = -0.7, North = 51.7, East = 0.4 };
+            var entityTypes = new List<string>();
+            entityTypes.Add("8211");
+            entityTypes.Add("3578");
+
+            BingSpatialDataService.FindNearby(rect, entityTypes);
+        }
     }
 }

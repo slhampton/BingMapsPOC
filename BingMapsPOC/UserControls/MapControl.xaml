@@ -19,51 +19,52 @@
                     <MenuItem Name="Clear" Click="ClearRoute_Click" Header="Clear Route"></MenuItem>
                 </MenuItem>
                 <MenuItem Name="Draw" Click="DrawArea_Click" Header="Draw Area"></MenuItem>
+                <MenuItem Name="Find" Click="FindNearby_Click" Header="Find Nearby POIs"></MenuItem>
             </ContextMenu>
         </Grid.ContextMenu>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Name="InstructionsColumn" Width="200"/>
-			<ColumnDefinition Width="*"/>
-		</Grid.ColumnDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Name="InstructionsColumn" Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="40" />
             <RowDefinition Height="40" />
         </Grid.RowDefinitions>
         <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.RowSpan="3">
-			<StackPanel Name="RouteResults" Orientation="Vertical" >
-				<TextBlock Name="Distance" />
-				<TextBlock Name="Duration" />
-				<ListBox Name="DirectionsListbox" ItemsSource="{Binding RouteLegs}" Width="200">
-					<ListBox.ItemTemplate>
-						<DataTemplate>
-							<ListBox ItemsSource="{Binding ItineraryItems}">
-								<ListBox.ContextMenu>
-									<ContextMenu>
-										<MenuItem Name="Zoom" Header="Zoom to Selection" Click="ZoomToSelection_Click"></MenuItem>
+            <StackPanel Name="RouteResults" Orientation="Vertical" >
+                <TextBlock Name="Distance" />
+                <TextBlock Name="Duration" />
+                <ListBox Name="DirectionsListbox" ItemsSource="{Binding RouteLegs}" Width="200">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <ListBox ItemsSource="{Binding ItineraryItems}">
+                                <ListBox.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Name="Zoom" Header="Zoom to Selection" Click="ZoomToSelection_Click"></MenuItem>
                                         <MenuItem Name="Nearby" Header="Find Nearby Places"></MenuItem>
                                         <MenuItem Name="Copy" Header="Copy Directions" Click="Copy_OnClick"></MenuItem>
                                         <MenuItem Name="Print" Header="Print" Click="Print_OnClick"></MenuItem>
-									</ContextMenu>
-								</ListBox.ContextMenu>
-								<ListBox.ItemTemplate>
-									<DataTemplate>
-										<StackPanel Orientation="Horizontal" MouseDown="Zoom" Tag="{Binding ManeuverPoint}">
-											<TextBlock Text="{Binding Instruction.Text}"
+                                    </ContextMenu>
+                                </ListBox.ContextMenu>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" MouseDown="Zoom" Tag="{Binding ManeuverPoint}">
+                                            <TextBlock Text="{Binding Instruction.Text}"
 												TextWrapping="Wrap" Width="130"/>
-											<TextBlock Text="{Binding TravelDistance}"
+                                            <TextBlock Text="{Binding TravelDistance}"
 												Margin="10,0,0,0" Width="15" />
-											<TextBlock Text="km"/>
-										</StackPanel>
-									</DataTemplate>
-								</ListBox.ItemTemplate>
-							</ListBox>
-						</DataTemplate>
-					</ListBox.ItemTemplate>
-				</ListBox>
-			</StackPanel>
-		</ScrollViewer>
-		<m:Map Name="Map" 
+                                            <TextBlock Text="km"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </ScrollViewer>
+        <m:Map Name="Map" 
                Grid.Column="1" 
                Grid.Row="0" 
                Grid.RowSpan="2" 
