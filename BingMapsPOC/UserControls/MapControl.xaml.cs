@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Globalization;
-using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -40,6 +38,7 @@ namespace UserControls
         private MapPolyline routeLine;
         private string instructions;
         private Route route;
+        private Services.Point instructionPoint;
 
         public MapControl()
         {
@@ -172,7 +171,8 @@ namespace UserControls
             // The pushpin to add to the map.
             var pin = new Pushpin
             {
-                Location = location
+                Location = location,
+                //Background = new SolidColorBrush(colour)
             };
             // Adds the pushpin to the map.
             this.baseLayer.Children.Add(pin);
@@ -310,8 +310,7 @@ namespace UserControls
             var startPin = new Pushpin
             {
                 Background = new SolidColorBrush(Colors.Green),
-                Location = this.startLocation,
-                Tag = "start"
+                Location = this.startLocation
             };
 
             // Adds the pushpin to the map.
@@ -328,8 +327,7 @@ namespace UserControls
             var endPin = new Pushpin
             {
                 Background = new SolidColorBrush(Colors.Red),
-                Location = this.endLocation,
-                Tag = "end"
+                Location = this.endLocation
             };
 
             // Adds the pushpin to the map.
@@ -347,8 +345,7 @@ namespace UserControls
             var stopPin = new Pushpin
             {
                 Background = new SolidColorBrush(Colors.Gray),
-                Location = stopLocation,
-                Tag = (stopLocations.Count + 1).ToString()
+                Location = stopLocation
             };
 
             // Adds the pushpin to the map.
@@ -365,12 +362,7 @@ namespace UserControls
         {
             this.pointClicked = e.GetPosition(this.Map);
         }
-
-        private void NodeSelected(object sender, MouseButtonEventArgs e)
-        {
-            //this.pointClicked = e.GetPosition(this);
-        }
-
+        
         private void mouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (!isDrawing)
@@ -486,12 +478,7 @@ namespace UserControls
 
             return loc;
         }
-
-        private void ZoomToSelection_Click(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         private void Copy_OnClick(object sender, RoutedEventArgs e)
         {
             Clipboard.SetText(this.instructions);
@@ -545,6 +532,17 @@ namespace UserControls
             }
 
             return doc;
+        }
+        private void Zoom(object sender, MouseButtonEventArgs e)
+        {
+            // TODO: Fix this shit!
+            this.instructionPoint = ((Services.Point) ((StackPanel) sender).Tag);
+        }
+
+        private void ZoomToSelection_Click(object sender, RoutedEventArgs e)
+        {
+            this.Map.Center = new Location(this.instructionPoint.Coordinates[0], this.instructionPoint.Coordinates[1]);
+            this.Map.ZoomLevel = 16;
         }
     }
 }
