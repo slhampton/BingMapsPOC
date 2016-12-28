@@ -102,7 +102,7 @@ namespace UserControls
             {
                 var lat = random.Next(52, 56);
                 var lon = random.Next(-7, 0);
-                DrawCustomPin(new Location(lat, lon), layer);
+                DrawRandomPins(new Location(lat, lon), layer);
             }
         }
 
@@ -158,7 +158,7 @@ namespace UserControls
 
             if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
-                DrawCustomPin(location, this.baseLayer);
+                DrawRandomPins(location, this.baseLayer);
             }
             else
             {
@@ -178,7 +178,7 @@ namespace UserControls
             this.baseLayer.Children.Add(pin);
         }
 
-        private void DrawCustomPin(Location location, MapLayer layer)
+        private void DrawRandomPins(Location location, MapLayer layer)
         {
             const double radius = 20.0;
             var finalImage = new Image
@@ -197,6 +197,27 @@ namespace UserControls
 
             MapLayer.SetPosition(finalImage, location);
             layer.Children.Add(finalImage);
+        }
+
+        private void DrawCustomPins(Location location, string poiName, string typeId )
+        {
+            const double radius = 20.0;
+            var finalImage = new Image
+            {
+                Width = radius * 2,
+                Height = radius * 2
+            };
+            var logo = new BitmapImage();
+            logo.BeginInit();
+            logo.UriSource = new Uri(Symbol.GetPOILocation(typeId), UriKind.Relative);
+            logo.EndInit();
+            finalImage.Source = logo;
+
+            var tt = new ToolTip { Content = poiName };
+            finalImage.ToolTip = tt;
+
+            MapLayer.SetPosition(finalImage, location);
+            this.baseLayer.Children.Add(finalImage);
         }
 
         private async void PlanRoute_Click(object sender, RoutedEventArgs e)
@@ -372,16 +393,15 @@ namespace UserControls
 
             isDrawing = false;
 
-            //Remove map events
             this.Map.MouseLeftButtonDown -= MouseTouchStartHandler;
             this.Map.MouseMove -= MouseTouchMoveHandler;
             this.Map.MouseLeftButtonUp -= MouseTouchEndHandler;
             this.Map.ViewChangeOnFrame -= ViewChangeOnFrame;
 
-            this.ZoomToSelection(this.currentShape);
+            this.ZoomToArea(this.currentShape);
         }
 
-        private void ZoomToSelection(MapPolygon rectangle)
+        private void ZoomToArea(MapPolygon rectangle)
         {
             var routeCentre = new LocationRect(currentShape.Locations);
             this.Map.SetView(routeCentre);
@@ -402,7 +422,7 @@ namespace UserControls
 
         private void DrawArea_Click(object sender, RoutedEventArgs e)
         {
-            //Capture the current center of the map. We will use this to lock the map view.
+            // Capture the current center of the map. We will use this to lock the map view.
             center = this.Map.Center;
 
             this.Map.MouseLeftButtonDown += MouseTouchStartHandler;
@@ -449,7 +469,7 @@ namespace UserControls
                 {
                     var firstLoc = currentShape.Locations[0];
 
-                    //Update locations 1 - 3 of polygon so as to create a rectangle.
+                    // Update locations 1 - 3 of polygon so as to create a rectangle.
                     currentShape.Locations[1] = new Location(firstLoc.Latitude, currentLoc.Longitude);
                     currentShape.Locations[2] = currentLoc;
                     currentShape.Locations[3] = new Location(currentLoc.Latitude, firstLoc.Longitude);
@@ -503,6 +523,8 @@ namespace UserControls
             FlowDocument doc = new FlowDocument();
 
             var mapSection = new Section();
+
+            // TODO: Add image to printout
             //mapSection.Blocks.Add(new BlockUIContainer(finalImage));
             var textSection = new Section();
             var table = new Table();
@@ -539,20 +561,24 @@ namespace UserControls
             this.instructionPoint = ((Services.Point) ((StackPanel) sender).Tag);
         }
 
-        private void ZoomToSelection_Click(object sender, RoutedEventArgs e)
+        private void Zoom_OnSelectionChanged(object sender, RoutedEventArgs e)
         {
             this.Map.Center = new Location(this.instructionPoint.Coordinates[0], this.instructionPoint.Coordinates[1]);
             this.Map.ZoomLevel = 16;
         }
 
-        private void FindNearby_Click(object sender, RoutedEventArgs e)
+        private async void FindNearby_Click(object sender, RoutedEventArgs e)
         {
-            var rect = new LocationRect { South = 51.2, West = -0.7, North = 51.7, East = 0.4 };
-            var entityTypes = new List<string>();
-            entityTypes.Add("8211");
-            entityTypes.Add("3578");
+            var currentCentre = new Location(this.instructionPoint.Coordinates[0], this.instructionPoint.Coordinates[1]);
+            var entityTypes = new List<string> { "8211" , "3578", "8060", "9565" };
 
-            BingSpatialDataService.FindNearby(rect, entityTypes);
+            var places = await BingSpatialDataService.FindNearby(currentCentre, entityTypes);
+
+            foreach (var place in places)
+            {
+                var location = new Location(Convert.ToDouble(place.Latitude), Convert.ToDouble(place.Longitude));
+                DrawCustomPins(location, place.DisplayName, place.EntityTypeID);
+            }
         }
     }
 }

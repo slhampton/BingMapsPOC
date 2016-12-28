@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Maps.MapControl.WPF;
+using Location = Microsoft.Maps.MapControl.WPF;
 using Newtonsoft.Json;
 
 namespace UserControls.Services
@@ -24,7 +24,7 @@ namespace UserControls.Services
         private const string Hospital = "Hospital";
         private const string Pharmacy = "Pharmacy";
 
-        public static async void FindNearby(LocationRect rectangle, List<string> entityTypes)
+        public static async Task<List<POI>> FindNearby(Microsoft.Maps.MapControl.WPF.Location center, List<string> entityTypes)
         {
             var filter = string.Empty;
 
@@ -44,31 +44,28 @@ namespace UserControls.Services
                 filter = sb.ToString();
             }
 
-            var uri = new Uri($"{BaseUrl}/{NavteqeuAccessId}/{DataSourceEurope}/NavteqPOIs?spatialFilter=bbox(51.2,-0.7,51.7,0.4)&$select=EntityTypeID,EntityID,Latitude,Longitude&$format=json&$top=250{filter}&key={BingApiKey}");
-            
+            var uri = new Uri($"{BaseUrl}/{NavteqeuAccessId}/{DataSourceEurope}/NavteqPOIs?spatialFilter=nearby({center.Latitude}, {center.Longitude}, 1)&$select=DisplayName,EntityTypeID,EntityID,Latitude,Longitude&$format=json&$top=250{filter}&key={BingApiKey}");
+
             // Make a request and get the response
             var r = await GetResponse(uri);
+            var result = new List<POI>();
 
-            //if (r != null &&
-            //    r.ResourceSets != null &&
-            //    r.ResourceSets.Length > 0 &&
-            //    r.ResourceSets[0].Resources != null &&
-            //    r.ResourceSets[0].Resources.Length > 0) 
-            //{
-            //    result = r.ResourceSets[0].Resources[0] as Route;
-            //}
+            foreach (var poi in r.ResultSet.Results.ToList())
+            {
+                result.Add(new POI{ DisplayName = poi.DisplayName, EntityTypeID = poi.EntityTypeID, Latitude =  poi.Latitude, Longitude = poi.Longitude });
+            }
 
-            //return result;
+            return result;
         }
 
-        private static async Task<Response> GetResponse(Uri uri)
+        private static async Task<JsonResponse> GetResponse(Uri uri)
         {
             var client = new HttpClient();
             var response = await client.GetAsync(uri);
 
             var s = await response.Content.ReadAsStringAsync();
 
-            var result = JsonConvert.DeserializeObject<Response>(s);
+            var result = JsonConvert.DeserializeObject<JsonResponse>(s);
 
             return result;
         }

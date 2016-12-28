@@ -7,10 +7,8 @@
     <Grid Name="MapViewGrid" MouseRightButtonDown="PointSelected">
         <Grid.ContextMenu>
             <ContextMenu>
-                <MenuItem Header="Zoom">
-                    <MenuItem Name="ZoomIn" Click="ZoomIn_Click" Header="Zoom In"></MenuItem>
-                    <MenuItem Name="ZoomOut" Click="ZoomOut_Click" Header="Zoom Out"></MenuItem>
-                </MenuItem>
+                <MenuItem Name="ZoomIn" Click="ZoomIn_Click" Header="Zoom In"></MenuItem>
+                <MenuItem Name="ZoomOut" Click="ZoomOut_Click" Header="Zoom Out"></MenuItem>
                 <MenuItem Header="Route">
                     <MenuItem Name="Start" Click="AddStartPoint" Header="Add as start point"></MenuItem>
                     <MenuItem Name="End" Click="AddEndPoint" Header="Add as end point"></MenuItem>
@@ -19,7 +17,6 @@
                     <MenuItem Name="Clear" Click="ClearRoute_Click" Header="Clear Route"></MenuItem>
                 </MenuItem>
                 <MenuItem Name="Draw" Click="DrawArea_Click" Header="Draw Area"></MenuItem>
-                <MenuItem Name="Find" Click="FindNearby_Click" Header="Find Nearby POIs"></MenuItem>
             </ContextMenu>
         </Grid.ContextMenu>
         <Grid.ColumnDefinitions>
@@ -35,22 +32,21 @@
             <StackPanel Name="RouteResults" Orientation="Vertical" >
                 <TextBlock Name="Distance" />
                 <TextBlock Name="Duration" />
-                <ListBox Name="DirectionsListbox" ItemsSource="{Binding RouteLegs}" Width="200">
+                <ListBox Name="DirectionsListbox" SelectionChanged="Zoom_OnSelectionChanged" ItemsSource="{Binding RouteLegs}" Width="200">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <ListBox ItemsSource="{Binding ItineraryItems}">
                                 <ListBox.ContextMenu>
                                     <ContextMenu>
-                                        <MenuItem Name="Zoom" Header="Zoom to Selection" Click="ZoomToSelection_Click"></MenuItem>
-                                        <MenuItem Name="Nearby" Header="Find Nearby Places"></MenuItem>
                                         <MenuItem Name="Copy" Header="Copy Directions" Click="Copy_OnClick"></MenuItem>
                                         <MenuItem Name="Print" Header="Print" Click="Print_OnClick"></MenuItem>
+                                        <MenuItem Name="Find" Click="FindNearby_Click" Header="Find Nearby POIs"></MenuItem>
                                     </ContextMenu>
                                 </ListBox.ContextMenu>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" MouseDown="Zoom" Tag="{Binding ManeuverPoint}">
-                                            <TextBlock Text="{Binding Instruction.Text}"
+                                            <TextBlock  Text="{Binding Instruction.Text}"
 												TextWrapping="Wrap" Width="130"/>
                                             <TextBlock Text="{Binding TravelDistance}"
 												Margin="10,0,0,0" Width="15" />
