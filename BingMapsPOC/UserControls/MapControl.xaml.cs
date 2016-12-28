@@ -28,6 +28,7 @@ namespace UserControls
         private readonly MapLayer baseLayer;
         private readonly MapLayer drawLayer;
         private readonly MapLayer routeLayer;
+        private readonly MapLayer poiLayer;
         private Point pointClicked;
         private readonly List<Location> stopLocations = new List<Location>();
         private List<MapLayer> InitialLayers = new List<MapLayer>();
@@ -39,6 +40,7 @@ namespace UserControls
         private string instructions;
         private Route route;
         private Services.Point instructionPoint;
+        
 
         public MapControl()
         {
@@ -47,9 +49,11 @@ namespace UserControls
             this.drawLayer = new MapLayer {Tag = "draw"};
             this.baseLayer = new MapLayer {Tag = "base"};
             this.routeLayer = new MapLayer {Tag = "route"};
+            this.poiLayer = new MapLayer { Tag = "poi" };
             this.Map.Children.Add(this.baseLayer);
             this.Map.Children.Add(this.drawLayer);
             this.Map.Children.Add(this.routeLayer);
+            this.Map.Children.Add(this.poiLayer);
 
             this.AddLayers();
 
@@ -69,7 +73,7 @@ namespace UserControls
 
             foreach (var layer in InitialLayers)
             {
-                this.AddPins(layer);
+                this.AddRandomPins(layer);
                 this.Map.Children.Add(layer);
             }
         }
@@ -96,13 +100,13 @@ namespace UserControls
             }
         }
 
-        private void AddPins(MapLayer layer)
+        private void AddRandomPins(MapLayer layer)
         {
             for (var i = 0; i < 3; i++)
             {
                 var lat = random.Next(52, 56);
                 var lon = random.Next(-7, 0);
-                DrawRandomPins(new Location(lat, lon), layer);
+                DrawCustomPins(new Location(lat, lon), null, null, layer);
             }
         }
 
@@ -158,7 +162,7 @@ namespace UserControls
 
             if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
-                DrawRandomPins(location, this.baseLayer);
+                DrawCustomPins(location, null, null, this.baseLayer);
             }
             else
             {
@@ -178,7 +182,25 @@ namespace UserControls
             this.baseLayer.Children.Add(pin);
         }
 
-        private void DrawRandomPins(Location location, MapLayer layer)
+        private void DrawCustomPins(Location location, string poiName, string typeId, MapLayer layer)
+        {
+            string toolTip;
+            if (poiName != null)
+            {
+                toolTip = poiName;
+            }
+            else
+            {
+                toolTip = $"CaseNo = {random.Next(10000, 99999)}";
+            }
+            
+            var finalImage = GetImage(toolTip, typeId, layer);
+
+            MapLayer.SetPosition(finalImage, location);
+            layer.Children.Add(finalImage);
+        }
+
+        private static Image GetImage(string toolTip, string typeId, MapLayer layer)
         {
             const double radius = 20.0;
             var finalImage = new Image
@@ -186,38 +208,18 @@ namespace UserControls
                 Width = radius*2,
                 Height = radius*2
             };
+
             var logo = new BitmapImage();
             logo.BeginInit();
-            logo.UriSource = new Uri(Symbol.GetImageLocation(layer.Tag.ToString()), UriKind.Relative);
+
+            logo.UriSource = layer.Tag.ToString() == "poi" ? new Uri(Symbol.GetPOILocation(typeId), UriKind.Relative) : new Uri(Symbol.GetImageLocation(layer.Tag.ToString()), UriKind.Relative);
+
             logo.EndInit();
             finalImage.Source = logo;
 
-            var tt = new ToolTip {Content = $"CaseNo = {random.Next(10000, 99999)}"};
+            var tt = new ToolTip {Content = toolTip};
             finalImage.ToolTip = tt;
-
-            MapLayer.SetPosition(finalImage, location);
-            layer.Children.Add(finalImage);
-        }
-
-        private void DrawCustomPins(Location location, string poiName, string typeId )
-        {
-            const double radius = 20.0;
-            var finalImage = new Image
-            {
-                Width = radius * 2,
-                Height = radius * 2
-            };
-            var logo = new BitmapImage();
-            logo.BeginInit();
-            logo.UriSource = new Uri(Symbol.GetPOILocation(typeId), UriKind.Relative);
-            logo.EndInit();
-            finalImage.Source = logo;
-
-            var tt = new ToolTip { Content = poiName };
-            finalImage.ToolTip = tt;
-
-            MapLayer.SetPosition(finalImage, location);
-            this.baseLayer.Children.Add(finalImage);
+            return finalImage;
         }
 
         private async void PlanRoute_Click(object sender, RoutedEventArgs e)
@@ -569,6 +571,7 @@ namespace UserControls
 
         private async void FindNearby_Click(object sender, RoutedEventArgs e)
         {
+            this.poiLayer.Children.Clear();
             var currentCentre = new Location(this.instructionPoint.Coordinates[0], this.instructionPoint.Coordinates[1]);
             var entityTypes = new List<string> { "8211" , "3578", "8060", "9565" };
 
@@ -577,7 +580,7 @@ namespace UserControls
             foreach (var place in places)
             {
                 var location = new Location(Convert.ToDouble(place.Latitude), Convert.ToDouble(place.Longitude));
-                DrawCustomPins(location, place.DisplayName, place.EntityTypeID);
+                DrawCustomPins(location, place.DisplayName, place.EntityTypeID, this.poiLayer);
             }
         }
     }
