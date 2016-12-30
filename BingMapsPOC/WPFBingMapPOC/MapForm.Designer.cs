@@ -29,27 +29,29 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MapForm));
-            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
-            this.mapControl1 = new UserControls.MapControl();
+            this.elementHost = new System.Windows.Forms.Integration.ElementHost();
+            this.bingMapsControl = new UserControls.MapControl();
             this.SuspendLayout();
             // 
-            // elementHost1
+            // elementHost
             // 
-            this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.elementHost1.Location = new System.Drawing.Point(0, 0);
-            this.elementHost1.Name = "elementHost1";
-            this.elementHost1.Size = new System.Drawing.Size(755, 525);
-            this.elementHost1.TabIndex = 2;
-            this.elementHost1.Text = "elementHost1";
-            this.elementHost1.Child = this.mapControl1;
+            this.elementHost.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.elementHost.Location = new System.Drawing.Point(0, 0);
+            this.elementHost.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.elementHost.Name = "elementHost";
+            this.elementHost.Size = new System.Drawing.Size(503, 341);
+            this.elementHost.TabIndex = 2;
+            this.elementHost.Text = "elementHost";
+            this.elementHost.Child = this.bingMapsControl;
             // 
             // MapForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(755, 525);
-            this.Controls.Add(this.elementHost1);
+            this.ClientSize = new System.Drawing.Size(503, 341);
+            this.Controls.Add(this.elementHost);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "MapForm";
             this.Text = "Bing Maps";
             this.ResumeLayout(false);
@@ -57,8 +59,8 @@
         }
 
         #endregion
-        private System.Windows.Forms.Integration.ElementHost elementHost1;
-        private UserControls.MapControl mapControl1;
+        private System.Windows.Forms.Integration.ElementHost elementHost;
+        private UserControls.MapControl bingMapsControl;
     }
 }
 

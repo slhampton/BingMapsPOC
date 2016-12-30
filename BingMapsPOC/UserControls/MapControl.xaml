@@ -10,9 +10,9 @@
                 <MenuItem Name="ZoomIn" Click="ZoomIn_Click" Header="Zoom In"></MenuItem>
                 <MenuItem Name="ZoomOut" Click="ZoomOut_Click" Header="Zoom Out"></MenuItem>
                 <MenuItem Header="Route">
-                    <MenuItem Name="Start" Click="AddStartPoint" Header="Add as start point"></MenuItem>
-                    <MenuItem Name="End" Click="AddEndPoint" Header="Add as end point"></MenuItem>
-                    <MenuItem Name="Stop" Click="AddStop" Header="Add stop"></MenuItem>
+                    <MenuItem Name="Start" Click="AddRouteStart" Header="Add as start point"></MenuItem>
+                    <MenuItem Name="End" Click="AddRouteEnd" Header="Add as end point"></MenuItem>
+                    <MenuItem Name="Stop" Click="AddRouteStop" Header="Add stop"></MenuItem>
                     <MenuItem Name="Plan" Click="PlanRoute_Click" Header="Plan Route"></MenuItem>
                     <MenuItem Name="Clear" Click="ClearRoute_Click" Header="Clear Route"></MenuItem>
                 </MenuItem>
@@ -68,17 +68,17 @@
                MouseDoubleClick="MapWithPushpins_MouseDoubleClick" 
                MouseLeftButtonUp="mouseLeftButtonUp" />
         <StackPanel Orientation="Horizontal" Opacity="0.7" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center">
-            <Button x:Name="btn1" Click="ChangeMapView_Click" Tag="39.3683,-95.2734,0.0000 4.0000"
+            <Button x:Name="btn1" Click="Bookmark_Click" Tag="39.3683,-95.2734,0.0000 4.0000"
                      Margin="5">
                 <TextBlock><Run Text="1"/></TextBlock>
             </Button>
-            <Button x:Name="btn2" Click="ChangeMapView_Click" Tag="40.7199,-74.0030,0.0000 12.0000" Margin="5">
+            <Button x:Name="btn2" Click="Bookmark_Click" Tag="40.7199,-74.0030,0.0000 12.0000" Margin="5">
                 <TextBlock><Run Text="2"/></TextBlock>
             </Button>
-            <Button x:Name="btn3" Click="ChangeMapView_Click" Tag="37.6801,-122.3395,0.0000 11.0000" Margin="5">
+            <Button x:Name="btn3" Click="Bookmark_Click" Tag="37.6801,-122.3395,0.0000 11.0000" Margin="5">
                 <TextBlock><Run Text="3"/></TextBlock>
             </Button>
-            <Button x:Name="btn4" Click="ChangeMapView_Click" Tag="49.2765,-123.1030,0.0000 14.0000" Margin="5">
+            <Button x:Name="btn4" Click="Bookmark_Click" Tag="49.2765,-123.1030,0.0000 14.0000" Margin="5">
                 <TextBlock><Run Text="4"/></TextBlock>
             </Button>
             <Button x:Name="btnZoomIn" Click="ZoomIn_Click" Margin="5" Height="20">

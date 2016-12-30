@@ -78,6 +78,10 @@
     <Compile Include="Services\BingSpatialDataService.cs" />
     <Compile Include="Services\DataContracts.cs" />
     <Compile Include="Services\JsonResponse.cs" />
+    <Compile Include="Services\Layers\BingLayer.cs" />
+    <Compile Include="Services\Layers\PoiLayer.cs" />
+    <Compile Include="Services\Layers\RouteLayer.cs" />
+    <Compile Include="Services\Layers\SymbolLayer.cs" />
     <Compile Include="Services\Result.cs" />
     <Compile Include="POI.cs" />
     <Compile Include="Services\ResultSet.cs" />
